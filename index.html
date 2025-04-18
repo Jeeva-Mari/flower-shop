@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Flower Shop</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: url('https://images.unsplash.com/photo-1501004318641-b39e6451bec6') no-repeat center center/cover;
+      animation: backgroundSlide 5s infinite alternate;
+    }
+
+    @keyframes backgroundSlide {
+      from { background-position: center; }
+      to { background-position: bottom; }
+    }
+
+    header {
+      background-color: rgba(255, 173, 123 , 0.85);
+      color: Black;
+      text-align: center;
+      padding: 2em;
+      font-weight: bold;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      background-image: #ff69b4
+      padding: 1em;
+    }
+
+    nav button {
+      margin: 0 1em;
+      padding: 0.75em 1.5em;
+      border: none;
+      background: rgba(255, 173, 123 , 0.85);
+      color: Black;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold
+    }
+
+    nav button:hover {
+      background: #ff1493;
+    }
+
+    .section {
+      display: none;
+      padding: 2em;
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .active {
+      display: block;
+      
+    }
+
+    .flowers {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1em;
+    }
+
+    .flower {
+      background: white;
+      padding: 1em;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 200px rgba(0,0,0,0.1);
+    }
+
+    .flower img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .cart-notification {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #4caf50;
+      color: Black;
+      padding: 0.5em 1em;
+      border-radius: 5px;
+      display: none;
+    }
+
+    .order-list li {
+      margin: 0.5em 0;
+    }
+
+    .account-form input {
+      display: block;
+      margin-bottom: 1em;
+      padding: 0.75em;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    footer {
+      background: rgba(255, 173, 123 , 0.85);
+      color: Black;
+      text-align: center;
+      padding: 1em;
+      margin-top: 2em;
+    }
+
+    .promo {
+      background: linear-gradient(90deg, #ff69b4, #ffb6c1);
+      color: Black;
+      text-align: center;
+      padding: 0.5em;
+      animation: slidePromo 15s linear infinite;
+      font-weight: bold;
+    }
+
+    @keyframes slidePromo {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🌸 Jeeva Boutique</h1>
+    <p>Fresh flowers delivered with elegance and love</p>
+  </header>
+
+  <div class="promo">🌼 Spring Sale! Get 20% off on all bouquets! Use code: JEEVA20 🌼</div>
+
+  <nav>
+    <button onclick="showSection('home')">Home</button>
+    <button onclick="showSection('catalog')">Catalog</button>
+    <button onclick="showSection('cart')">Cart</button>
+    <button onclick="showSection('account')">Account</button>
+    <button onclick="showSection('about')">About</button>
+  </nav>
+
+  <div id="home" class="section active">
+    <h2>Welcome to Jeeva Boutique</h2>
+    <p>We handpick and deliver the freshest flowers for every special occasion. Choose from a wide range of seasonal and exotic blooms. Fast delivery and stunning arrangements guaranteed!</p>
+  </div>
+
+  <div id="catalog" class="section">
+    <h2>Explore Our Flowers</h2>
+    <div class="flowers" id="flowerContainer"></div>
+  </div>
+
+  <div id="cart" class="section">
+    <h2>Your Cart</h2>
+    <ul id="cartItems"></ul>
+    <h3>Delivery Status</h3>
+    <p id="deliveryStatus">Pending</p>
+    <button onclick="trackDelivery()">Track Delivery</button>
+  </div>
+
+  <div id="account" class="section">
+    <h2>Account Information</h2>
+    <form class="account-form" onsubmit="submitAccount(event)">
+      <input type="text" placeholder="First Name" required />
+      <input type="text" placeholder="Last Name" required />
+      <input type="email" placeholder="Email" required />
+      <input type="text" placeholder="Phone Number" required />
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+  <div id="about" class="section">
+    <h2>About Us</h2>
+    <p>Jeeva Boutique is a leading online flower delivery service committed to offering stunning floral arrangements, prompt delivery, and exceptional customer care. We collaborate with local florists and growers to ensure only the freshest flowers arrive at your doorstep. Whether it’s a birthday, anniversary, or just because, we help you celebrate every moment with beauty and fragrance.</p>
+  </div>
+
+  <div class="cart-notification" id="cartNote">Added to cart!</div>
+
+  <footer>
+    <p>&copy; 2025 Jeeva Boutique | All rights reserved.</p>
+  </footer>
+
+  <script>
+    const flowers = [
+      { name: "Red Roses", img: "https://source.unsplash.com/400x300/?red-roses", price: 20 },
+      { name: "Tulips", img: "https://source.unsplash.com/400x300/?tulips", price: 18 },
+      { name: "Lilies", img: "https://source.unsplash.com/400x300/?lilies", price: 22 },
+      { name: "Sunflowers", img: "https://source.unsplash.com/400x300/?sunflowers", price: 15 },
+      { name: "Daisies", img: "https://source.unsplash.com/400x300/?daisies", price: 12 },
+      { name: "Orchids", img: "https://source.unsplash.com/400x300/?orchids", price: 25 }
+    ];
+
+    const cart = [];
+    let deliveryStep = 0;
+    const deliveryStatusSteps = ["Dispatched", "Out for Delivery", "Delivered"];
+
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function loadFlowers() {
+      const container = document.getElementById("flowerContainer");
+      flowers.forEach(flower => {
+        const div = document.createElement("div");
+        div.className = "flower";
+        div.innerHTML = `
+          <img src="${flower.img}" alt="${flower.name}">
+          <h3>${flower.name}</h3>
+          <p>$${flower.price.toFixed(2)}</p>
+          <button onclick="addToCart('${flower.name}', ${flower.price})">Add to Cart</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addToCart(flowerName, price) {
+      cart.push({ name: flowerName, price });
+      updateCart();
+      const note = document.getElementById("cartNote");
+      note.style.display = "block";
+      setTimeout(() => { note.style.display = "none"; }, 2000);
+    }
+
+    function updateCart() {
+      const list = document.getElementById("cartItems");
+      list.innerHTML = "";
+      cart.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = `${item.name} - $${item.price.toFixed(2)}`;
+        list.appendChild(li);
+      });
+    }
+
+    function trackDelivery() {
+      const status = document.getElementById("deliveryStatus");
+      if (deliveryStep < deliveryStatusSteps.length) {
+        status.textContent = deliveryStatusSteps[deliveryStep];
+        deliveryStep++;
+      } else {
+        alert("Order already delivered.");
+      }
+    }
+
+    function submitAccount(e) {
+      e.preventDefault();
+      alert("Account details submitted successfully!");
+    }
+
+    window.onload = loadFlowers;
+  </script>
+
+</body>
+</html>
